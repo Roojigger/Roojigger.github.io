@@ -1,0 +1,70 @@
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 20%;
+}
+img{
+  border: 5px solid #DBDBDB;
+}
+body {
+  background-color: #333333;
+}
+Button {
+  text-align: center;
+  border-radius: 8px;
+  vertical-align:middle;
+  font-size: 12px;
+  background-color: #111111;
+  color: gray;
+  transition-duration: 0.4s;
+  display: block;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: auto;
+  width: 20%;
+}
+
+Button:hover {
+  background-color: #047A6D; /* Green */
+  color: white;
+}
+h1 {
+  color: white;
+  text-align: center;
+}
+
+p {
+  font-family: verdana;
+  color: #DBDBDB;
+  font-size: 20px;
+}
+a:link {
+  text-decoration: none;
+}
+
+a:visited {
+  text-decoration: none;
+}
+Button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s
+}
+Button span:after {
+  content: ". \00bb";
+  opacity: 0;
+  font-size: 15px;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+Button:hover span {
+  padding-right: 3px;
+}
+Button:hover span:after {
+  opacity: 1;
+  right: 0;
+}
