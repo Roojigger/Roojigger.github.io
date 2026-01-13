@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GPS Point / Poly Submit</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .left, .right {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 300px;
+        }
+
+        ul {
+            padding-left: 18px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        button {
+            margin-top: 5px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<form id="gpsForm" action="/submit" method="post">
+    <input type="hidden" name="type" id="submitType">
+    <input type="hidden" name="data" id="submitData">
+
+    <div class="container">
+        <!-- LEFT: POLY -->
+        <div class="left">
+            <h3>Polygon</h3>
+
+            <button type="button" onclick="addPoint()">Add current GPS point</button>
+
+            <ul id="pointList"></ul>
+
+            <button type="button" onclick="submitPoly()">Submit as poly</button>
+        </div>
+
+        <!-- RIGHT: POINT -->
+        <div class="right">
+            <h3>Point</h3>
+
+            <button type="button" onclick="submitPoint()">Submit current GPS point</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    const points = [];
+
+    function getCurrentPosition(callback) {
+        if (!navigator.geolocation) {
+            alert("Geolocation not supported");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                callback({
+                    lat: pos.coords.latitude,
+                    lon: pos.coords.longitude
+                });
+            },
+            err => {
+                alert("GPS error: " + err.message);
+            }
+        );
+    }
+
+    function addPoint() {
+        getCurrentPosition(p => {
+            points.push(p);
+            updateList();
+        });
+    }
+
+    function updateList() {
+        const list = document.getElementById("pointList");
+        list.innerHTML = "";
+
+        points.forEach((p, i) => {
+            const li = document.createElement("li");
+            li.textContent = `${i}: ${p.lat}, ${p.lon}`;
+            list.appendChild(li);
+        });
+    }
+
+    function submitPoint() {
+        getCurrentPosition(p => {
+            document.getElementById("submitType").value = "point";
+            document.getElementById("submitData").value = JSON.stringify(p);
+            document.getElementById("gpsForm").submit();
+        });
+    }
+
+    function submitPoly() {
+        if (points.length < 2) {
+            alert("Need at least 2 points for a poly");
+            return;
+        }
+
+        document.getElementById("submitType").value = "poly";
+        document.getElementById("submitData").value = JSON.stringify(points);
+        document.getElementById("gpsForm").submit();
+    }
+</script>
+
+</body>
+</html>
