@@ -89,13 +89,14 @@
 
     function updateList() {
         const list = document.getElementById("pointList");
-        list.innerHTML = "";
+        list.innerText = `Number of points: ${points.length}`
+        // list.innerHTML = "";
 
-        points.forEach((p, i) => {
-            const li = document.createElement("li");
-            li.textContent = `${i}: ${p.lat}, ${p.lon}`;
-            list.appendChild(li);
-        });
+        // points.forEach((p, i) => {
+        //     const li = document.createElement("li");
+        //     li.textContent = `${i}: ${p.lat}, ${p.lon}`;
+        //     list.appendChild(li);
+        // });
     }
 
     function submitPoint() {
