@@ -5,7 +5,7 @@
     <title>GPS Point / Poly Submit</title>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: monospace;
         }
 
         .container {
@@ -39,7 +39,7 @@
 
     <div class="container">
         <!-- LEFT: POLY -->
-        <div class="left">
+        <div class="right">
             <h3>Polygon</h3>
 
             <button type="button" onclick="addPoint()">Add current GPS point</button>
@@ -50,7 +50,7 @@
         </div>
 
         <!-- RIGHT: POINT -->
-        <div class="right">
+        <div class="left">
             <h3>Point</h3>
 
             <button type="button" onclick="submitPoint()">Submit current GPS point</button>
@@ -111,10 +111,14 @@
             alert("Need at least 2 points for a poly");
             return;
         }
-
+        
         document.getElementById("submitType").value = "poly";
         document.getElementById("submitData").value = JSON.stringify(points);
         document.getElementById("gpsForm").submit();
+
+        const list = document.getElementById("pointList");
+        list.innerHTML = "";
+        points = [];
     }
 </script>
 
