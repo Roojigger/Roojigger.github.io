@@ -88,10 +88,10 @@
     };
 
     function success(pos) {
-        callback({
-            lat: pos.coords.latitude,
-            lon: pos.coords.longitude
-        });
+        callback([
+            pos.coords.latitude,
+            pos.coords.longitude
+        ]);
     }
 
     function error(err) {
