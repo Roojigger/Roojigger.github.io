@@ -137,7 +137,12 @@
             {
                 alert("Must Enter a group name to download")
             }
-
+            
+            var a = document.createElement('a');
+            var blob = new Blob([data], {'type':'text/json'});
+            a.href = URL.createObjectURL(blob);
+            a.download = `Survay data for ${GName}.json`;
+            a.click();
 
             console.log(JSON.stringify(data))
             data = {
