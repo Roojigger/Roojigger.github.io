@@ -44,9 +44,7 @@
         <div class="box">
             <h3>Polygon</h3>
     
-            <button type="button" onclick="addPoint()">Add current GPS point to polygon</button>
-    
-            <ul id="pointList"></ul>
+            <button type="button" onclick="addPointtoPoly()">Add current GPS point to polygon</button>
     
             <button type="button" onclick="addPoly()">Add polygon</button>
         </div>
@@ -63,12 +61,12 @@
         <div class="box">
             <h3>Submit</h3>
             <label for="Gname" style="font-size: 40px;">Group Name: </label>
-            <input id="GName" type="text" height=20px style="font-size: 40px; height: 10%; width: 60%; border: 2px solid #222; margin-bottom: 20px; border-radius: 30px;">
+            <input id="GName" type="text" height=20px style="font-size: 40px; height: 10%; width: 60%; border: 2px solid #222; margin-bottom: 20px;">
             <button type="button" onclick="downloadData()">Download Data</button>
         </div>
     </div>
     <script>
-        const polyPoints = [];
+        var polyPoints = [];
 
         var data = {
             "type" : "FeatureCollection",
@@ -95,16 +93,10 @@
             );
         }
     
-        function addPoint() {
-            getCurrentPosition(p => {
-                polyPoints.push(p);
-                updateList();
+        function addPointtoPoly() {
+            getCurrentPosition(pos => {
+                polyPoints.push([pos.lat, pos.lon]);
             });
-        }
-    
-        function updateList() {
-            const list = document.getElementById("pointList");
-            list.innerText = `Number of points in polygon: ${polyPoints.length}`
         }
     
         function addPoint() {
@@ -126,23 +118,33 @@
                 return;
             }
             
-            document.getElementById("submitType").value = "poly";
-            document.getElementById("submitData").value = JSON.stringify(polyPoints);
-            document.getElementById("gpsForm").submit();
+            console.log(JSON.stringify(polyPoints));
+            data.features.push({
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [JSON.stringify(polyPoints)]
+                    },
+                    "properties": { }
+            })   
     
-            const list = document.getElementById("pointList");
-            list.innerHTML = "";
             polyPoints = [];
     
         }
         function downloadData() {
-            console.log(data)
+            var GName = document.getElementById("GName").value
+            if (GName == "")
+            {
+                alert("Must Enter a group name to download")
+            }
+
+
+            console.log(JSON.stringify(data))
             data = {
                 "type" : "FeatureCollection",
                 "features" : [
                 ]
             }; 
-            // TODO: THIS FUNC and redo the rest
         }
     </script>
 </body>
