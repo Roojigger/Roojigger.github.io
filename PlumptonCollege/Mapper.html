@@ -5,7 +5,7 @@
     <title>GPS Point / Poly Submit</title>
     <style>
         body {
-            font-family: monospace;
+			font-family: monospace;
             font-size: 20px;
         }
 
@@ -75,27 +75,55 @@
         }; 
     
         function getCurrentPosition(callback) {
-            if (!navigator.geolocation) {
-                alert("Geolocation not supported");
+
+    if (!("geolocation" in navigator)) {
+        alert("Geolocation not supported");
+        return;
+    }
+
+    const options = {
+        enableHighAccuracy: false, // improves compatibility
+        timeout: 10000,            // prevents silent hang
+        maximumAge: 300000         // allow cached result (5 min)
+    };
+
+    function success(pos) {
+        callback({
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude
+        });
+    }
+
+    function error(err) {
+        alert("GPS error (" + err.code + "): " + err.message);
+    }
+
+    // Optional permission pre-check
+    if (navigator.permissions) {
+        navigator.permissions.query({ name: "geolocation" })
+        .then(result => {
+
+            if (result.state === "denied") {
+                alert("Location permission denied");
                 return;
             }
-    
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    callback({
-                        lat: pos.coords.latitude,
-                        lon: pos.coords.longitude
-                    });
-                },
-                err => {
-                    alert("GPS error: " + err.message);
-                }
-            );
-        }
+
+            navigator.geolocation.getCurrentPosition(success, error, options);
+
+        })
+        .catch(() => {
+            navigator.geolocation.getCurrentPosition(success, error, options);
+        });
+    }
+    else {
+        navigator.geolocation.getCurrentPosition(success, error, options);
+    }
+}
+
     
         function addPointtoPoly() {
             getCurrentPosition(pos => {
-                polyPoints.push([pos.lat, pos.lon]);
+                polyPoints.push(pos);
             });
         }
     
@@ -105,7 +133,7 @@
                     "type": "Feature",
                     "geometry": {
                         "type": "Point",
-                        "coordinates": [pos.lat, pos.lon]
+                        "coordinates": pos
                     },
                     "properties": { }
                 })   
@@ -141,7 +169,7 @@
             var a = document.createElement('a');
             var blob = new Blob([data], {'type':'text/json'});
             a.href = URL.createObjectURL(blob);
-            a.download = `Survay data for ${GName}.json`;
+            a.download = `Survey data for ${GName}.json`;
             a.click();
 
             console.log(JSON.stringify(data))
