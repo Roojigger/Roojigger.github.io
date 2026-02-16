@@ -6,17 +6,20 @@
     <style>
         body {
             font-family: monospace;
+            font-size: 20px;
         }
 
         .container {
             display: flex;
             gap: 40px;
+            margin-bottom: 40px;
         }
 
-        .left, .right {
-            border: 2px solid #ccc;
+        .box {
+            border: 4px solid #222;
             padding: 20px;
-            width: 600px;
+            width: 100%;
+            height: 800px;
         }
 
         ul {
@@ -27,101 +30,120 @@
 
         button {
             margin-top: 10px;
-            width: 200%;
+            border: 0px;
+            border-radius: 50px;
+            width: 100%;
+            height: 40%;
+            font-size: 40px;
         }
     </style>
 </head>
 <body>
-
-<form id="gpsForm" action="/submit" method="post">
-    <input type="hidden" name="type" id="submitType">
-    <input type="hidden" name="data" id="submitData">
-
     <div class="container">
         <!-- LEFT: POLY -->
-        <div class="left">
+        <div class="box">
             <h3>Polygon</h3>
-
-            <button type="button" onclick="addPoint()">Add current GPS point</button>
-
+    
+            <button type="button" onclick="addPoint()">Add current GPS point to polygon</button>
+    
             <ul id="pointList"></ul>
-
-            <button type="button" onclick="submitPoly()">Submit as poly</button>
+    
+            <button type="button" onclick="addPoly()">Add polygon</button>
         </div>
-
+    
         <!-- RIGHT: POINT -->
-        <div class="right">
+        <div class="box">
             <h3>Point</h3>
-
-            <button type="button" onclick="submitPoint()">Submit current GPS point</button>
+    
+            <button type="button" onclick="addPoint()">Add current GPS point</button>
         </div>
     </div>
-</form>
+    <div class="container">
+        <!-- Bottom Submit and Name -->
+        <div class="box">
+            <h3>Submit</h3>
+            <label for="Gname" style="font-size: 40px;">Group Name: </label>
+            <input id="GName" type="text" height=20px style="font-size: 40px; height: 10%; width: 60%; border: 2px solid #222; margin-bottom: 20px; border-radius: 30px;">
+            <button type="button" onclick="downloadData()">Download Data</button>
+        </div>
+    </div>
+    <script>
+        const polyPoints = [];
 
-<script>
-    const points = [];
-
-    function getCurrentPosition(callback) {
-        if (!navigator.geolocation) {
-            alert("Geolocation not supported");
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                callback({
-                    lat: pos.coords.latitude,
-                    lon: pos.coords.longitude
-                });
-            },
-            err => {
-                alert("GPS error: " + err.message);
+        var data = {
+            "type" : "FeatureCollection",
+            "features" : [
+            ]
+        }; 
+    
+        function getCurrentPosition(callback) {
+            if (!navigator.geolocation) {
+                alert("Geolocation not supported");
+                return;
             }
-        );
-    }
-
-    function addPoint() {
-        getCurrentPosition(p => {
-            points.push(p);
-            updateList();
-        });
-    }
-
-    function updateList() {
-        const list = document.getElementById("pointList");
-        list.innerText = `Number of points: ${points.length}`
-        // list.innerHTML = "";
-
-        // points.forEach((p, i) => {
-        //     const li = document.createElement("li");
-        //     li.textContent = `${i}: ${p.lat}, ${p.lon}`;
-        //     list.appendChild(li);
-        // });
-    }
-
-    function submitPoint() {
-        getCurrentPosition(p => {
-            document.getElementById("submitType").value = "point";
-            document.getElementById("submitData").value = JSON.stringify(p);
-            document.getElementById("gpsForm").submit();
-        });
-    }
-
-    function submitPoly() {
-        if (points.length < 2) {
-            alert("Need at least 2 points for a poly");
-            return;
+    
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    callback({
+                        lat: pos.coords.latitude,
+                        lon: pos.coords.longitude
+                    });
+                },
+                err => {
+                    alert("GPS error: " + err.message);
+                }
+            );
         }
-        
-        document.getElementById("submitType").value = "poly";
-        document.getElementById("submitData").value = JSON.stringify(points);
-        document.getElementById("gpsForm").submit();
-
-        const list = document.getElementById("pointList");
-        list.innerHTML = "";
-        points = [];
-    }
-</script>
-
+    
+        function addPoint() {
+            getCurrentPosition(p => {
+                polyPoints.push(p);
+                updateList();
+            });
+        }
+    
+        function updateList() {
+            const list = document.getElementById("pointList");
+            list.innerText = `Number of points in polygon: ${polyPoints.length}`
+        }
+    
+        function addPoint() {
+            getCurrentPosition(pos => 
+                data.features.push({
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [pos.lat, pos.lon]
+                    },
+                    "properties": { }
+                })   
+            );     
+        }
+    
+        function addPoly() {
+            if (polyPoints.length < 2) {
+                alert("Need at least 2 polyPoints for a poly");
+                return;
+            }
+            
+            document.getElementById("submitType").value = "poly";
+            document.getElementById("submitData").value = JSON.stringify(polyPoints);
+            document.getElementById("gpsForm").submit();
+    
+            const list = document.getElementById("pointList");
+            list.innerHTML = "";
+            polyPoints = [];
+    
+        }
+        function downloadData() {
+            console.log(data)
+            data = {
+                "type" : "FeatureCollection",
+                "features" : [
+                ]
+            }; 
+            // TODO: THIS FUNC and redo the rest
+        }
+    </script>
 </body>
 </html>
