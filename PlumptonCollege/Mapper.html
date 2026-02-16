@@ -5,7 +5,7 @@
     <title>GPS Point / Poly Submit</title>
     <style>
         body {
-			font-family: monospace;
+            font-family: monospace;
             font-size: 20px;
         }
 
@@ -74,56 +74,55 @@
             ]
         }; 
     
-        function getCurrentPosition(callback) {
-
-    if (!("geolocation" in navigator)) {
-        alert("Geolocation not supported");
-        return;
-    }
-
-    const options = {
-        enableHighAccuracy: false, // improves compatibility
-        timeout: 10000,            // prevents silent hang
-        maximumAge: 300000         // allow cached result (5 min)
-    };
-
-    function success(pos) {
-        callback([
-            pos.coords.latitude,
-            pos.coords.longitude
-        ]);
-    }
-
-    function error(err) {
-        alert("GPS error (" + err.code + "): " + err.message);
-    }
-
-    // Optional permission pre-check
-    if (navigator.permissions) {
-        navigator.permissions.query({ name: "geolocation" })
-        .then(result => {
-
-            if (result.state === "denied") {
-                alert("Location permission denied");
+        function getCurrentPosition(callback)
+        {
+            if (!("geolocation" in navigator)) {
+                alert("Geolocation not supported");
                 return;
             }
 
-            navigator.geolocation.getCurrentPosition(success, error, options);
+            const options = {
+                enableHighAccuracy: true, // improves compatibility
+                timeout: 10000,            // prevents silent hang
+                maximumAge: 300000         // allow cached result (5 min)
+            };
 
-        })
-        .catch(() => {
-            navigator.geolocation.getCurrentPosition(success, error, options);
-        });
-    }
-    else {
-        navigator.geolocation.getCurrentPosition(success, error, options);
-    }
-}
+            function success(pos) {
+                callback([
+                    pos.coords.latitude,
+                    pos.coords.longitude
+                ]);
+            }
 
+            function error(err) {
+                alert("GPS error (" + err.code + "): " + err.message);
+            }
+
+            // Optional permission pre-check
+            if (navigator.permissions) {
+                navigator.permissions.query({ name: "geolocation" })
+                .then(result => {
+
+                    if (result.state === "denied") {
+                        alert("Location permission denied");
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(success, error, options);
+
+                })
+                .catch(() => {
+                    navigator.geolocation.getCurrentPosition(success, error, options);
+                });
+            }
+            else {
+                navigator.geolocation.getCurrentPosition(success, error, options);
+            }
+        }
     
         function addPointtoPoly() {
             getCurrentPosition(pos => {
-                polyPoints.push(pos);
+                polyPoints.push([pos.lat, pos.lon]);
             });
         }
     
@@ -133,7 +132,7 @@
                     "type": "Feature",
                     "geometry": {
                         "type": "Point",
-                        "coordinates": pos
+                        "coordinates": [pos.lat, pos.lon]
                     },
                     "properties": { }
                 })   
@@ -159,25 +158,38 @@
             polyPoints = [];
     
         }
-        function downloadData() {
-            var GName = document.getElementById("GName").value
-            if (GName == "")
-            {
-                alert("Must Enter a group name to download")
-            }
-            
-            var a = document.createElement('a');
-            var blob = new Blob([data], {'type':'text/json'});
-            a.href = URL.createObjectURL(blob);
-            a.download = `Survey data for ${GName}.json`;
-            a.click();
+        function downloadData() 
+        {
+            var GName = document.getElementById("GName").value;
 
-            console.log(JSON.stringify(data))
+            if (GName === "") {
+                alert("Must Enter a group name to download");
+                return;
+            }
+
+            var blob = new Blob(
+                [JSON.stringify(data, null, 2)],
+                { type: "application/json" }
+            );
+
+            var url = URL.createObjectURL(blob);
+
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "Survey data for " + GName + ".json";
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(url);
+
+            console.log(JSON.stringify(data));
+
             data = {
-                "type" : "FeatureCollection",
-                "features" : [
-                ]
-            }; 
+                "type": "FeatureCollection",
+                "features": []
+            };
         }
     </script>
 </body>
